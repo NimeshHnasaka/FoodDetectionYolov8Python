@@ -1,0 +1,19 @@
+description: Ultralytics best model trained on /content/datasets/Food-Items-5/data.yaml
+author: Ultralytics
+license: AGPL-3.0 https://ultralytics.com/license
+date: '2024-03-09T05:13:15.782215'
+version: 8.0.196
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 800
+- 800
+names:
+  0: Egg
+  1: Fride-Rice
+  2: Fruit
+  3: Meat
+  4: Noodles
+  5: Pizza
+  6: White-Rice

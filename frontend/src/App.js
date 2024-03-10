@@ -47,46 +47,59 @@
 // export default FoodDetectionApp;
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import Webcam from 'react-webcam';
 import axios from 'axios';
 
-const App = () => {
-    const [image, setImage] = useState(null);
+function App() {
 
-    const handleFileChange = async (event) => {
-        const file = event.target.files[0];
-        const formData = new FormData();
-        formData.append('image', file);
 
-        try {
-            const response = await axios.post('http://127.0.0.1:5000/detect', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+    const webcamRef = useRef(null);
 
-            setImage(response.data);
-        } catch (error) {
-            console.error('Error detecting objects:', error);
-        }
-    };
+    useEffect(() => {
+      const fetchImage = async () => {
+        const response = await axios.get('http://127.0.0.1:5000/video_feed', {
+          responseType: 'arraybuffer',
+        });
+        const image = Buffer.from(response.data, 'binary').toString('base64');
+        const imageSrc = `data:image/jpeg;base64,${image}`;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = function () {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0, img.width, img.height);
+          context.font = '16px Arial';
+          context.fillStyle = 'red';
+          context.fillText('Detected Object', 10, 50); // Adjust text position as needed
+          const webcamVideo = document.querySelector('video');
+          webcamVideo.srcObject = canvas.captureStream();
+        };
+        img.src = imageSrc;
+      };
+  
+      const intervalId = setInterval(fetchImage, 100); // Adjust the interval as needed
+  
+      return () => clearInterval(intervalId);
+    }, []);
 
-    return (
+
+
+
+
+
+
+  return (
+    <div>
         <div>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-            {image && (
-                <div>
-                    {image.map((result, index) => (
-                        <div key={index}>
-                            <p>Class: {result.class_name}</p>
-                            <p>Confidence: {result.confidence}</p>
-                            <p>Bbox: {result.bbox.join(', ')}</p>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
+      <Webcam ref={webcamRef} />
+    </div>
+    </div>
+  )
+}
 
-export default App;
+export default App
+
+
+
